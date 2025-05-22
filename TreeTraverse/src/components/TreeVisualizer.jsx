@@ -92,6 +92,7 @@ const TreeVisualizer = ({ root }) => {
     );
 };
 
+
 const Line = ({ direction }) => {
     return (
         <div
@@ -103,24 +104,75 @@ const Line = ({ direction }) => {
     );
 };
 
+const getTreeWidth = (node) => {
+    if (!node) return 0;
+    if (!node.left && !node.right) return 1;
+    
+    const leftWidth = getTreeWidth(node.left);
+    const rightWidth = getTreeWidth(node.right);
+    
+    return leftWidth + rightWidth;
+};
+
 const renderTree = (node, highlighted) => {
     if (!node) return null;
+    
+    const leftWidth = getTreeWidth(node.left);
+    const rightWidth = getTreeWidth(node.right);
+    
+    const calculatedGap = Math.max(8, (leftWidth + rightWidth) * 8);
     
     return (
         <div className="flex flex-col items-center relative">
             <TreeNode value={node.value} highlighted={node === highlighted} />
             {(node.left || node.right) && (
-                <div className="flex gap-10 mt-6 relative">
+                <div className="flex mt-6 relative" style={{ gap: `${calculatedGap}px` }}>
                     {node.left && (
-                        <div className="relative">
-                            <Line direction="left" />
+                        <div className="relative flex flex-col items-center">
+                            <svg 
+                                className="absolute -top-6" 
+                                style={{
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    width: `${calculatedGap / 2 + 30}px`,
+                                    height: '24px',
+                                    overflow: 'visible'
+                                }}
+                            >
+                                <line
+                                    x1={calculatedGap / 2 + 30}
+                                    y1="0"
+                                    x2="30"
+                                    y2="24"
+                                    stroke="#9CA3AF"
+                                    strokeWidth="2"
+                                />
+                            </svg>
                             {renderTree(node.left, highlighted)}
                         </div>
                     )}
-                    {!node.left && node.right && <div className="w-10"></div>}
+                    {!node.left && node.right && <div style={{ width: `${calculatedGap / 2}px` }}></div>}
                     {node.right && (
-                        <div className="relative">
-                            <Line direction="right" />
+                        <div className="relative flex flex-col items-center">
+                            <svg 
+                                className="absolute -top-6" 
+                                style={{
+                                    left: '50%',
+                                    transform: 'translateX(-50%)',
+                                    width: `${calculatedGap / 2 + 30}px`,
+                                    height: '24px',
+                                    overflow: 'visible'
+                                }}
+                            >
+                                <line
+                                    x1="0"
+                                    y1="0"
+                                    x2={calculatedGap / 2}
+                                    y2="24"
+                                    stroke="#9CA3AF"
+                                    strokeWidth="2"
+                                />
+                            </svg>
                             {renderTree(node.right, highlighted)} 
                         </div>
                     )}
