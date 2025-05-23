@@ -8,9 +8,11 @@ const TreeVisualizer = ({ root }) => {
     const [highlighted, setHighlighted] = useState(null);
     const [activeAlgorithm, setActiveAlgorithm] = useState(null);
     const [isRunning, setIsRunning] = useState(false);
+    const [visitedArr, setVisitedArr] = useState([]);
 
     const visit = async (node) => {
         setHighlighted(node);
+        setVisitedArr(prev => [...prev, node.value]);
         await sleep(600);
     };
 
@@ -20,6 +22,7 @@ const TreeVisualizer = ({ root }) => {
         setIsRunning(true);
         setActiveAlgorithm(type);
         setHighlighted(null);
+        setVisitedArr([])
         
         try {
             if (type === 'inorder') await inorder(root, visit);
@@ -29,6 +32,7 @@ const TreeVisualizer = ({ root }) => {
         } finally {
             setHighlighted(null);
             setIsRunning(false);
+            setTimeout(() => setVisitedArr([]), 1000);
         }
     };
 
@@ -77,15 +81,27 @@ const TreeVisualizer = ({ root }) => {
                 >
                     Level Order
                 </button>
+
             </div>
-            
+                         {visitedArr && visitedArr.length > 0 && (
+                <div className="mt-0 text-center">
+                    <h3 className="text-lg font-semibold text-white mb-2">Traversal Order:</h3>
+                    <div className="flex flex-wrap justify-center gap-2 text-blue-300">
+                        {visitedArr.map((val, index) => (
+                            <span key={index} className="bg-blue-800 px-3 py-1 rounded-lg shadow-md">
+                                {val}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
             {!root && (
                 <div className="text-gray-400 italic mt-4">
                     Add nodes to visualize the tree
                 </div>
             )}
-            
             <div className="flex flex-col items-center overflow-auto p-4">
+                
                 {renderTree(root, highlighted)}
             </div>
         </div>
@@ -124,6 +140,7 @@ const renderTree = (node, highlighted) => {
     
     return (
         <div className="flex flex-col items-center relative">
+
             <TreeNode value={node.value} highlighted={node === highlighted} />
             {(node.left || node.right) && (
                 <div className="flex mt-6 relative" style={{ gap: `${calculatedGap}px` }}>
